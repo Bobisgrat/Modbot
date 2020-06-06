@@ -1,6 +1,12 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const config = require('./config.json');
+let token;
+if (process.env.BOT_TOKEN) {
+	token = process.env.BOT_TOKEN;
+}
+else {
+	token = require('./config.json').token;
+}
 const client = new Discord.Client();
 
 const words = fs.readFileSync('words.txt', 'utf8').split('\n');
