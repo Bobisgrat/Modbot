@@ -29,40 +29,50 @@ function handleCommand(message) {
 	const command = args.shift().toLowerCase();
 
 	if (command === 'startgame') {
-		message.guild.roles.fetch().then(roles => {
-			mutedRole[channelId] = roles.cache.find(r => r.name === 'Muted');
-			words.sort(() => Math.random()*2-1);
-			currentwords[channelId] = words.slice(0, 5);
-			message.channel.send('The game has started.');
-		});
+		if (message.member.hasPermission(['ADMINISTRATOR'])) {
+			message.guild.roles.fetch().then(roles => {
+				mutedRole[channelId] = roles.cache.find(r => r.name === 'Muted');
+				words.sort(() => Math.random()*2-1);
+				currentwords[channelId] = words.slice(0, 5);
+				message.channel.send('The game has started.');
+			});
+		}
 	}
 	else if (command === 'endgame') {
-		currentwords[channelId] = undefined;
-		resetRoles(message);
-		return message.channel.send('The game has ended.');
+		if (message.member.hasPermission(['ADMINISTRATOR'])) {
+			currentwords[channelId] = undefined;
+			resetRoles(message);
+			return message.channel.send('The game has ended.');
+		}
 	}
 	else if (command === 'guess') {
 		handleGuess(args[0], message);
   }
 	else if (command === 'words') {
-		return message.channel.send(`${currentwords[channelId]}`);
+		if (message.member.displayName === 'Mistibournes') {
+			return message.channel.send(`${currentwords[channelId]}`);
+		}
 	}
 	else if (command === 'createmuterole') {
-		message.guild.roles.create({ data: { name: 'Muted' } });
-		return message.channel.send('Role created! Please change the permissions of this role by denying \'Send Messages\' in the channel this bot will be in.');
+		if (message.member.hasPermission(['ADMINISTRATOR'])) {
+			message.guild.roles.create({ data: { name: 'Muted' } });
+			return message.channel.send('Role created! Please change the permissions of this role by denying \'Send Messages\' in the channel this bot will be in.');
+		}
 	}
 	else if (command === 'invite') {
 		message.member.send('The invite link is https://discord.com/api/oauth2/authorize?client_id=717549273201508423&permissions=268443648&scope=bot');
 		return message.channel.send('You have been DM\'d the invite link.');
 	}
 	else if (command === 'prefix') {
-		if (!args.length) {
-			delete prefix[guildId];
+		if (message.member.hasPermission(['ADMINISTRATOR'])) {
+			if (!args.length) {
+				delete prefix[guildId];
+			}
+			else {
+				prefix[guildId] = args[0];
+			}
+			return message.channel.send(`The prefix has been set to '${prefix[guildId] || '!'}'.`)
 		}
-		else {
-			prefix[guildId] = args[0];
-		}
-		return message.channel.send(`The prefix has been set to '${prefix[guildId] || '!'}'.`)
 	}
 	else if (command === 'help') {
 		message.reply('you have been DM\'d the help menu.')
